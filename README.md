@@ -45,6 +45,14 @@ Edite `.env` e preencha as variáveis:
 | `SECRET_KEY` | Chave secreta da sessão do PowerDNS-Admin (Flask) | `outra-senha-segura` |
 | `DB_PASSWORD` | Senha do banco PostgreSQL | `outra-senha-segura` |
 
+Para gerar valores seguros para `API_KEY`, `SECRET_KEY` e `DB_PASSWORD`:
+
+```bash
+openssl rand -hex 32
+```
+
+Execute uma vez para cada variável.
+
 Edite `pdns.conf` e defina os mesmos valores de `API_KEY` e `DB_PASSWORD` nos campos correspondentes.
 
 ---
@@ -55,7 +63,12 @@ Edite `pdns.conf` e defina os mesmos valores de `API_KEY` e `DB_PASSWORD` nos ca
 docker compose up -d
 ```
 
-O banco PostgreSQL é inicializado automaticamente na primeira execução. O PowerDNS-Admin estará disponível em `https://<ADMIN_HOST>`. No primeiro acesso, crie o usuário administrador pela interface.
+O banco PostgreSQL é inicializado automaticamente na primeira execução. O PowerDNS-Admin estará disponível em `https://<ADMIN_HOST>`. No primeiro acesso:
+
+1. Crie o usuário administrador pela interface
+2. Vá em **Settings → PDNS API Settings** e configure:
+   - **API URL**: `http://pdns:8081`
+   - **API Key**: o valor de `API_KEY`
 
 ---
 
@@ -68,6 +81,10 @@ ns1.example.com.    A    <IPv4 do servidor>      (DNS only)
 dev.example.com.    NS   ns1.example.com.     (DNS only)
 lab.example.com.    NS   ns1.example.com.     (DNS only)
 ```
+
+> **Importante:** Os registros NS devem ser **DNS only** (sem proxy). Não é possível ter um registro A e NS no mesmo nome.
+
+Para adicionar uma nova zona posteriormente, crie primeiro o registro NS no Cloudflare e depois a zona no PowerDNS-Admin (**Zones → New Zone**, tipo **Native**).
 
 ---
 
