@@ -1,6 +1,6 @@
 # pdns-dev
 
-Servidor DNS autoritativo baseado no [PowerDNS](https://www.powerdns.com/) para gerenciar múltiplas zonas DNS. Usa backend SQLite, expõe uma API REST para criação e atualização de registros, e inclui o [PowerDNS-Admin](https://github.com/PowerDNS-Admin/PowerDNS-Admin) como interface web.
+Servidor DNS autoritativo baseado no [PowerDNS](https://www.powerdns.com/) para gerenciar múltiplas zonas DNS. Usa backend PostgreSQL, expõe uma API REST para criação e atualização de registros, e inclui o [PowerDNS-Admin](https://github.com/PowerDNS-Admin/PowerDNS-Admin) como interface web.
 
 A cadeia de resolução funciona assim:
 
@@ -43,8 +43,9 @@ Edite `.env` e preencha as variáveis:
 | `API_HOST` | Hostname pelo qual o Traefik expõe a API REST | `ns1.example.com` |
 | `ADMIN_HOST` | Hostname pelo qual o Traefik expõe o PowerDNS-Admin | `pdns-admin.example.com` |
 | `SECRET_KEY` | Chave secreta da sessão do PowerDNS-Admin (Flask) | `outra-senha-segura` |
+| `DB_PASSWORD` | Senha do banco PostgreSQL | `outra-senha-segura` |
 
-Edite `pdns.conf` e defina o mesmo valor de `API_KEY` no campo `api-key`.
+Edite `pdns.conf` e defina os mesmos valores de `API_KEY` e `DB_PASSWORD` nos campos correspondentes.
 
 ---
 
@@ -54,7 +55,7 @@ Edite `pdns.conf` e defina o mesmo valor de `API_KEY` no campo `api-key`.
 docker compose up -d
 ```
 
-O PowerDNS-Admin estará disponível em `https://<ADMIN_HOST>`. No primeiro acesso, crie o usuário administrador pela interface.
+O banco PostgreSQL é inicializado automaticamente na primeira execução. O PowerDNS-Admin estará disponível em `https://<ADMIN_HOST>`. No primeiro acesso, crie o usuário administrador pela interface.
 
 ---
 
@@ -123,12 +124,7 @@ dig NS dev.example.com
 
 ## Persistência
 
-- Dados do PowerDNS (SQLite): `./data`
-- Dados do PowerDNS-Admin (SQLite): `./admin-data`
-
-```bash
-chmod -R a+w ./data ./admin-data
-```
+- Dados do PostgreSQL: `./data`
 
 ---
 
@@ -137,4 +133,5 @@ chmod -R a+w ./data ./admin-data
 ```bash
 docker logs -f pdns
 docker logs -f pdns-admin
+docker logs -f pdns-db
 ```

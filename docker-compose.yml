@@ -1,4 +1,17 @@
 services:
+  db:
+    image: postgres:16-alpine
+    container_name: pdns-db
+    environment:
+      - POSTGRES_DB=pdns
+      - POSTGRES_USER=pdns
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - internal
+
   pdns:
     image: powerdns/pdns-auth-master
     container_name: pdns
@@ -6,9 +19,10 @@ services:
       - "53:53"
       - "53:53/udp"
     volumes:
-      - ./data:/var/lib/powerdns
       - ./pdns.conf:/etc/powerdns/pdns.conf:ro
     restart: unless-stopped
+    depends_on:
+      - db
     networks:
       - web
       - internal
@@ -25,15 +39,14 @@ services:
     container_name: pdns-admin
     environment:
       - SECRET_KEY=${SECRET_KEY}
-      - SQLA_DB_URI=sqlite:////data/pdns-admin.db
+      - SQLA_DB_URI=postgresql://pdns:${DB_PASSWORD}@db/pdns-admin
       - PDNS_PROTO=http
       - PDNS_HOST=pdns
       - PDNS_PORT=8081
       - PDNS_API_KEY=${API_KEY}
-    volumes:
-      - ./admin-data:/data
     restart: unless-stopped
     depends_on:
+      - db
       - pdns
     networks:
       - web
