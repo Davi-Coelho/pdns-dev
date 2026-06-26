@@ -1,0 +1,4 @@
+.env
+pdns.conf
+data/
+admin-data/

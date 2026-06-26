@@ -1,0 +1,53 @@
+services:
+  pdns:
+    image: powerdns/pdns-auth-master
+    container_name: pdns
+    ports:
+      - "53:53"
+      - "53:53/udp"
+    volumes:
+      - ./data:/var/lib/powerdns
+      - ./pdns.conf:/etc/powerdns/pdns.conf:ro
+    restart: unless-stopped
+    networks:
+      - web
+      - internal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      - "traefik.http.routers.pdns.rule=Host(`${API_HOST}`)"
+      - "traefik.http.routers.pdns.entrypoints=websecure"
+      - "traefik.http.routers.pdns.tls.certresolver=cloudflare"
+      - "traefik.http.services.pdns.loadbalancer.server.port=8081"
+
+  pdns-admin:
+    image: powerdnsadmin/pda-legacy:latest
+    container_name: pdns-admin
+    environment:
+      - SECRET_KEY=${SECRET_KEY}
+      - SQLA_DB_URI=sqlite:////data/pdns-admin.db
+      - PDNS_PROTO=http
+      - PDNS_HOST=pdns
+      - PDNS_PORT=8081
+      - PDNS_API_KEY=${API_KEY}
+    volumes:
+      - ./admin-data:/data
+    restart: unless-stopped
+    depends_on:
+      - pdns
+    networks:
+      - web
+      - internal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      - "traefik.http.routers.pdns-admin.rule=Host(`${ADMIN_HOST}`)"
+      - "traefik.http.routers.pdns-admin.entrypoints=websecure"
+      - "traefik.http.routers.pdns-admin.tls.certresolver=cloudflare"
+      - "traefik.http.services.pdns-admin.loadbalancer.server.port=80"
+
+networks:
+  web:
+    external: true
+  internal:
+    driver: bridge
