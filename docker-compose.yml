@@ -40,7 +40,7 @@ services:
     container_name: pdns-admin
     environment:
       - SECRET_KEY=${SECRET_KEY}
-      - SQLA_DB_URI=postgresql://pdns:${DB_PASSWORD}@db/pdns-admin
+      - SQLALCHEMY_DATABASE_URI=postgresql://pdns:${DB_PASSWORD}@db/pdns-admin
       - PDNS_PROTO=http
       - PDNS_HOST=pdns
       - PDNS_PORT=8081
