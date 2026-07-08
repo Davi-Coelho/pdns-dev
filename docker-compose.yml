@@ -41,10 +41,9 @@ services:
     environment:
       - SECRET_KEY=${SECRET_KEY}
       - SQLALCHEMY_DATABASE_URI=postgresql://pdns:${DB_PASSWORD}@db/pdns-admin
-      - PDNS_PROTO=http
-      - PDNS_HOST=pdns
-      - PDNS_PORT=8081
+      - PDNS_STATS_URL=http://pdns:8081/
       - PDNS_API_KEY=${API_KEY}
+      - PDNS_VERSION=4.9.0
     restart: unless-stopped
     depends_on:
       - db
